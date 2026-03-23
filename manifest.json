@@ -1,0 +1,69 @@
+{
+  "manifest_version": 3,
+  "name": "Chatplay Assistant",
+  "version": "9.2.0",
+  "description": "Assistente inteligente para o painel Chatplay — sugestões contextuais via backend centralizado.",
+  "default_locale": "pt_BR",
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://chatplay.com.br/*",
+    "https://*.chatplay-backend.com.br/*",
+    "https://backend-assistant-0x1d.onrender.com/*",
+    "https://*.onrender.com/*"
+  ],
+
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatplay.com.br/panel/chatplay*"
+      ],
+      "js": [
+        "src/content_script.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Chatplay Assistant"
+  },
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/chatplay_core.js",
+        "src/storage_adapter.js"
+      ],
+      "matches": [
+        "https://chatplay.com.br/*"
+      ]
+    }
+  ]
+}
