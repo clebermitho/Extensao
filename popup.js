@@ -258,11 +258,11 @@ async function init() {
 
 // Login
 $('btn-login').addEventListener('click', async () => {
-    const email    = $('input-email').value.trim();
+    const credential = $('input-email').value.trim();
     const password = $('input-password').value;
 
-    if (!email || !password) {
-        setLoginError('Preencha e-mail e senha.');
+    if (!credential || !password) {
+        setLoginError('Preencha e-mail/usuário e senha.');
         return;
     }
 
@@ -271,9 +271,12 @@ $('btn-login').addEventListener('click', async () => {
     setStatus('Autenticando…', 'amber');
 
     try {
+        const loginBody = credential.includes('@')
+            ? { email: credential, password }
+            : { username: credential, password };
         const res = await apiRequest('/api/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(loginBody),
         });
         state.user = res.user;
         await saveAuth(res.token, res.expiresAt, res.refreshToken);

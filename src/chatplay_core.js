@@ -128,10 +128,13 @@ const BackendAPI = {
     },
 
     /** Login — salva token no CONFIG e no storage */
-    async login(email, password) {
+    async login(credential, password) {
+        const loginBody = credential.includes('@')
+            ? { email: credential, password }
+            : { username: credential, password };
         const data = await this.request('/api/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(loginBody),
         });
         CONFIG.BACKEND_TOKEN = data.token;
         storageSet(STORAGE_KEYS.BACKEND_TOKEN, data.token);
