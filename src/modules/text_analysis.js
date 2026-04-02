@@ -163,7 +163,8 @@ export function classificarIntencaoComConfianca(texto) {
     const segundoScore = entries[1]?.[1] ?? 0;
 
     // Confiança baseada na margem entre o primeiro e segundo candidatos.
-    // Se só há um candidato com score, usa a distância normalizada pelo peso máximo.
+    // Divisor `pesoMax * 2`: a margem máxima possível é ~2× o maior peso (cenário onde
+    // só um candidato acerta e com máxima acumulação), normalizando o resultado em [0, 1].
     const pesoMax = Math.max(...Object.values(categorias).map(c => c.peso));
     const margem = topScore - segundoScore;
     const confianca = Math.min(margem / (pesoMax * 2), 1);
