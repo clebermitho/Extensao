@@ -83,6 +83,21 @@ export function calcularSimilaridadeSemantica(a, b) {
 }
 
 export function classificarIntencao(texto) {
+    return classificarIntencaoComConfianca(texto).categoria;
+}
+
+/**
+ * Classifica a intenção do texto e retorna a categoria com score de confiança.
+ *
+ * Retorna `{ categoria, confianca }` onde `confianca` é um número em [0, 1]:
+ *   - ≥ 0.7 → classificação confiável (pode ser enviada como hint ao backend)
+ *   - < 0.7 → baixa confiança (deixar backend classificar do zero)
+ *   - 0     → nenhuma palavra-chave encontrada → categoria "OUTROS"
+ *
+ * @param {string} texto
+ * @returns {{ categoria: string, confianca: number }}
+ */
+export function classificarIntencaoComConfianca(texto) {
     let t = normalizar(texto);
 
     const categorias = {
@@ -138,9 +153,21 @@ export function classificarIntencao(texto) {
         for (let cat in scores) scores[cat] *= 0.8;
     }
 
-    if (Object.keys(scores).length > 0) {
-        return Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+    const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+    if (entries.length === 0) {
+        return { categoria: "OUTROS", confianca: 0 };
     }
 
-    return "OUTROS";
+    const [topCategoria, topScore] = entries[0];
+    const segundoScore = entries[1]?.[1] ?? 0;
+
+    // Confiança baseada na margem entre o primeiro e segundo candidatos.
+    // Divisor `pesoMax * 2`: a margem máxima possível é ~2× o maior peso (cenário onde
+    // só um candidato acerta e com máxima acumulação), normalizando o resultado em [0, 1].
+    const pesoMax = Math.max(...Object.values(categorias).map(c => c.peso));
+    const margem = topScore - segundoScore;
+    const confianca = Math.min(margem / (pesoMax * 2), 1);
+
+    return { categoria: topCategoria, confianca };
 }
